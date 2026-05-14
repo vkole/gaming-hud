@@ -19,13 +19,29 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// API Routes
-app.use('/api', routes);
+// Root endpoint
+app.get('/', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Gaming MOAP HUD Backend is running',
+    service: 'gaming-moap-hud',
+    routes: {
+      health: '/health',
+      game: '/api/game',
+      scores: '/api/scores'
+    }
+  });
+});
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'healthy'
+  });
 });
+
+// API Routes
+app.use('/api', routes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
