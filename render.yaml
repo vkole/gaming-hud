@@ -2,8 +2,9 @@ services:
   - type: web
     name: gaming-hud-backend
     runtime: node
-    startCommand: npm install && npm run build && npm start
+    root: backend
     buildCommand: npm install && npm run build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
