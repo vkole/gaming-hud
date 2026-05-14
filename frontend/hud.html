@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Gaming HUD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .player-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .cell {
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 32px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            user-select: none;
+            color: #667eea;
+        }
+
+        .cell:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .cell.x {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .cell.o {
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .status {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .status.win {
+            border-left-color: #4caf50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status.loss {
+            border-left-color: #f44336;
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status.draw {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-primary:disabled,
+        .btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            background: #f5f5f5;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 12px;
+            margin-top: auto;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tic Tac Toe</h1>
+            <div class="player-info">
+                <div>Player: <span id="playerName">Loading...</span></div>
+                <div id="gameStatus" style="margin-top: 5px; color: #999; font-size: 11px;"></div>
+            </div>
+        </div>
+
+        <div class="status" id="status" style="display: none;"></div>
+
+        <div class="game-board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-primary" id="startBtn" onclick="startGame()">New Game</button>
+            <button class="btn-secondary" id="statsBtn" onclick="getStats()">Stats</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Processing...</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-row">
+                <span class="stat-label">Total Games:</span>
+                <span class="stat-value" id="totalGames">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Wins:</span>
+                <span class="stat-value" id="totalWins">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Losses:</span>
+                <span class="stat-value" id="totalLosses">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Draws:</span>
+                <span class="stat-value" id="totalDraws">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://your-render-app.onrender.com';
+        
+        let currentSessionId = null;
+        let currentPlayerId = null;
+        let currentPlayerUUID = null;
+        let gameActive = false;
+        let playerMoves = [];
+        let aiMoves = [];
+        let startTime = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            getCurrentPlayer();
+            loadStats();
+            attachCellListeners();
+        });
+
+        function getCurrentPlayer() {
+            // In a real MOAP setup, this would come from the HUD/LSL
+            // For now, we'll use a random UUID
+            const uuid = localStorage.getItem('playerUUID') || generateUUID();
+            localStorage.setItem('playerUUID', uuid);
+            currentPlayerUUID = uuid;
+            
+            const name = localStorage.getItem('playerName') || 'Player';
+            document.getElementById('playerName').textContent = name;
+            
+            return { uuid, name };
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function attachCellListeners() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    if (!gameActive) return;
+                    const index = parseInt(this.dataset.index);
+                    makeMove(index);
+                });
+            });
+        }
+
+        async function startGame() {
+            showLoading(true);
+            clearStatus();
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/games/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        playerUUID: currentPlayerUUID,
+                        playerName: document.getElementById('playerName').textContent
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to start game');
+                
+                const data = await response.json();
+                currentSessionId = data.sessionId;
+                currentPlayerId = data.player.id;
+                gameActive = true;
+                playerMoves = [];
+                aiMoves = [];
+                startTime = Date.now();
+
+                clearBoard();
+                updateStatus('Your turn (X)', 'info');
+                document.getElementById('startBtn').textContent = 'New Game';
+            } catch (error) {
+                console.error('Error starting game:', error);
+                updateStatus('Error starting game', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function makeMove(index) {
+            if (!gameActive || !currentSessionId) return;
+
+            showLoading(true);
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/games/move`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: currentSessionId,
+                        position: index
+                    })
+                });
+
+                if (!response.ok) throw new Error('Invalid move');
+                
+                const data = await response.json();
+                
+                // Update board display
+                updateBoard(data.gameState.board);
+                playerMoves.push(index);
+
+                if (data.gameOver) {
+                    gameActive = false;
+                    handleGameEnd(data.winner);
+                } else {
+                    // AI made a move
+                    const aiMove = data.gameState.moves[data.gameState.moves.length - 1];
+                    if (aiMove !== undefined) {
+                        aiMoves.push(aiMove);
+                    }
+                    
+                    if (!data.gameState.gameOver) {
+                        updateStatus('AI turn...', 'info');
+                    } else {
+                        gameActive = false;
+                        handleGameEnd(data.winner);
+                    }
+                }
+            } catch (error) {
+                console.error('Error making move:', error);
+                updateStatus('Invalid move', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function updateBoard(boardState) {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach((cell, index) => {
+                const value = boardState[index];
+                cell.textContent = value === 'X' ? 'X' : value === 'O' ? 'O' : '';
+                cell.classList.remove('x', 'o');
+                if (value === 'X') cell.classList.add('x');
+                if (value === 'O') cell.classList.add('o');
+            });
+        }
+
+        function clearBoard() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o');
+            });
+        }
+
+        async function handleGameEnd(winner) {
+            let result, message;
+            
+            if (winner === 'X') {
+                result = 'win';
+                message = 'You won! 🎉';
+                updateStatus(message, 'win');
+            } else if (winner === 'O') {
+                result = 'loss';
+                message = 'AI won!';
+                updateStatus(message, 'loss');
+            } else {
+                result = 'draw';
+                message = "It's a draw!";
+                updateStatus(message, 'draw');
+            }
+
+            // Save game result
+            await saveGameResult(result);
+            await loadStats();
+        }
+
+        async function saveGameResult(result) {
+            try {
+                const duration = Math.floor((Date.now() - startTime) / 1000);
+                
+                const response = await fetch(`${BACKEND_URL}/api/games/end`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: currentSessionId,
+                        result: result,
+                        movesPlayed: playerMoves.length + aiMoves.length,
+                        gameDuration: duration
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('Game result saved');
+                }
+            } catch (error) {
+                console.error('Error saving game result:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(
+                    `${BACKEND_URL}/api/players/${currentPlayerUUID}/stats`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalGames').textContent = 
+                        data.stats.total_games_played;
+                    document.getElementById('totalWins').textContent = 
+                        data.stats.total_wins;
+                    document.getElementById('totalLosses').textContent = 
+                        data.stats.total_losses;
+                    document.getElementById('totalDraws').textContent = 
+                        data.stats.total_draws;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function getStats() {
+            loadStats();
+            updateStatus('Stats updated', 'info');
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type;
+            statusEl.style.display = 'block';
+        }
+
+        function clearStatus() {
+            document.getElementById('status').style.display = 'none';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

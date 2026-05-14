@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: gaming-hud-backend
+    runtime: node
+    startCommand: npm install && npm run build && npm start
+    buildCommand: npm install && npm run build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gaming_hud_db
+          property: connectionString
+
+databases:
+  - name: gaming_hud_db
+    databaseName: gaming_hud
+    user: gaming_hud_user
+    region: ohio

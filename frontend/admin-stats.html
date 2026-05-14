@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming HUD - Admin Stats Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .table-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5f5f5;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            font-weight: bold;
+            color: #667eea;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+            min-width: 30px;
+        }
+
+        .rank.gold {
+            color: #ffd700;
+        }
+
+        .rank.silver {
+            color: #c0c0c0;
+        }
+
+        .rank.bronze {
+            color: #cd7f32;
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat {
+            text-align: center;
+            color: #666;
+        }
+
+        .stat.wins {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .stat.losses {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .stat.draws {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #f44336;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #4caf50;
+            margin-bottom: 20px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .uuid-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #999;
+            max-width: 200px;
+            word-break: break-all;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .table-section {
+                padding: 15px;
+            }
+
+            header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Gaming HUD Dashboard</h1>
+            <p>Tic Tac Toe Statistics & Leaderboards</p>
+        </header>
+
+        <div class="dashboard" id="statsCards">
+            <div class="stat-card">
+                <h3>Total Players</h3>
+                <div class="value" id="totalPlayers">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Games</h3>
+                <div class="value" id="totalGamesPlayed">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Top Win Rate</h3>
+                <div class="value" id="topWinRate">-</div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h2>⭐ Top Players (by Wins)</h2>
+            <div class="controls">
+                <button onclick="loadLeaderboard()">Refresh</button>
+                <button onclick="loadAllPlayers()">View All Players</button>
+            </div>
+            <div id="leaderboardContainer" class="no-data">Loading...</div>
+        </div>
+
+        <div class="table-section" style="display: none;" id="allPlayersSection">
+            <h2>👥 All Players</h2>
+            <div class="controls">
+                <button onclick="sortPlayersByName()">Sort by Name</button>
+                <button onclick="sortPlayersByGames()">Sort by Games</button>
+                <button onclick="loadLeaderboard()">Back to Leaderboard</button>
+            </div>
+            <div id="allPlayersContainer" class="no-data">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://your-render-app.onrender.com';
+        let leaderboardData = [];
+        let allPlayersData = [];
+        let currentView = 'leaderboard'; // 'leaderboard' or 'all'
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+        });
+
+        async function loadLeaderboard() {
+            try {
+                document.getElementById('allPlayersSection').style.display = 'none';
+                currentView = 'leaderboard';
+                
+                showLoading('leaderboardContainer', true);
+
+                const response = await fetch(`${BACKEND_URL}/api/leaderboard/top-wins?limit=20`);
+                if (!response.ok) throw new Error('Failed to load leaderboard');
+
+                const data = await response.json();
+                leaderboardData = data.leaderboard;
+
+                renderLeaderboard();
+                updateStatsCards();
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                showError('leaderboardContainer', 'Failed to load leaderboard');
+            }
+        }
+
+        async function loadAllPlayers() {
+            try {
+                document.getElementById('allPlayersSection').style.display = 'block';
+                currentView = 'all';
+
+                showLoading('allPlayersContainer', true);
+
+                const response = await fetch(`${BACKEND_URL}/api/leaderboard/all`);
+                if (!response.ok) throw new Error('Failed to load all players');
+
+                const data = await response.json();
+                allPlayersData = data.players;
+
+                renderAllPlayers();
+            } catch (error) {
+                console.error('Error loading all players:', error);
+                showError('allPlayersContainer', 'Failed to load players');
+            }
+        }
+
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboardContainer');
+
+            if (leaderboardData.length === 0) {
+                container.innerHTML = '<div class="no-data">No players yet</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Rank</th><th>Player Name</th><th>Games</th><th>Wins</th><th>Losses</th><th>Draws</th><th>Win %</th><th>Last Played</th></tr></thead><tbody>';
+
+            leaderboardData.forEach((entry, index) => {
+                const player = entry.player;
+                const stats = entry.stats;
+                const winPercentage = stats.total_games_played > 0 
+                    ? ((stats.total_wins / stats.total_games_played) * 100).toFixed(1)
+                    : 0;
+                const lastPlayed = stats.last_played_date 
+                    ? new Date(stats.last_played_date).toLocaleDateString()
+                    : 'Never';
+
+                let rankClass = '';
+                if (index === 0) rankClass = 'gold';
+                else if (index === 1) rankClass = 'silver';
+                else if (index === 2) rankClass = 'bronze';
+
+                html += `
+                    <tr>
+                        <td><span class="rank ${rankClass}">${index + 1}</span></td>
+                        <td><span class="player-name">${escapeHtml(player.display_name)}</span></td>
+                        <td class="stat">${stats.total_games_played}</td>
+                        <td class="stat wins">${stats.total_wins}</td>
+                        <td class="stat losses">${stats.total_losses}</td>
+                        <td class="stat draws">${stats.total_draws}</td>
+                        <td class="stat">${winPercentage}%</td>
+                        <td class="stat">${lastPlayed}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderAllPlayers() {
+            const container = document.getElementById('allPlayersContainer');
+
+            if (allPlayersData.length === 0) {
+                container.innerHTML = '<div class="no-data">No players</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Player Name</th><th>UUID</th><th>Games</th><th>Wins</th><th>Losses</th><th>Draws</th><th>Win %</th><th>Joined</th></tr></thead><tbody>';
+
+            allPlayersData.forEach((entry) => {
+                const player = entry.player;
+                const stats = entry.stats;
+                const winPercentage = stats.total_games_played > 0 
+                    ? ((stats.total_wins / stats.total_games_played) * 100).toFixed(1)
+                    : 0;
+                const joined = new Date(player.created_at).toLocaleDateString();
+
+                html += `
+                    <tr>
+                        <td><span class="player-name">${escapeHtml(player.display_name)}</span></td>
+                        <td><span class="uuid-cell">${player.uuid}</span></td>
+                        <td class="stat">${stats.total_games_played}</td>
+                        <td class="stat wins">${stats.total_wins}</td>
+                        <td class="stat losses">${stats.total_losses}</td>
+                        <td class="stat draws">${stats.total_draws}</td>
+                        <td class="stat">${winPercentage}%</td>
+                        <td class="stat">${joined}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function updateStatsCards() {
+            const totalPlayers = leaderboardData.length;
+            let totalGames = 0;
+            let maxWinRate = 0;
+
+            leaderboardData.forEach((entry) => {
+                const stats = entry.stats;
+                totalGames += stats.total_games_played;
+                const winRate = stats.total_games_played > 0 
+                    ? (stats.total_wins / stats.total_games_played) * 100
+                    : 0;
+                maxWinRate = Math.max(maxWinRate, winRate);
+            });
+
+            document.getElementById('totalPlayers').textContent = totalPlayers;
+            document.getElementById('totalGamesPlayed').textContent = totalGames;
+            document.getElementById('topWinRate').textContent = maxWinRate.toFixed(1) + '%';
+        }
+
+        function sortPlayersByName() {
+            allPlayersData.sort((a, b) => 
+                a.player.display_name.localeCompare(b.player.display_name)
+            );
+            renderAllPlayers();
+        }
+
+        function sortPlayersByGames() {
+            allPlayersData.sort((a, b) =>
+                b.stats.total_games_played - a.stats.total_games_played
+            );
+            renderAllPlayers();
+        }
+
+        function showLoading(containerId, show) {
+            const container = document.getElementById(containerId);
+            if (show) {
+                container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+            }
+        }
+
+        function showError(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
