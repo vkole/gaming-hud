@@ -5,71 +5,54 @@
 // Install on a prim and link with an HTML-serving prim for the UI
 
 // Configuration
-string BACKEND_URL = "https://your-render-app.onrender.com";
+string BACKEND_URL = "https://gaming-hud-q5sn.onrender.com";
 string PLAYER_NAME = "";
 key PLAYER_UUID;
 string SESSION_ID = "";
 integer HTTP_TIMEOUT = 30;
+integer HUD_FRAME_LINK = 1;
+integer MOAP_SCREEN_LINK = 2;
+integer MOAP_FACE = 1;
+
+// Visual setup
+vector FRAME_COLOR = <0.05, 0.08, 0.12>;
+float FRAME_ALPHA = 1.0;
+float FRAME_GLOW = 0.04;
+string MOAP_HOME_URL = "https://gaming-hud-q5sn.onrender.com";
 
 // Game state
 list BOARD_STATE = [];
 integer GAME_ACTIVE = FALSE;
 integer CURRENT_PLAYER = 0; // 0 = player (X), 1 = AI (O)
 
-// Initialize HUD
-default
+// Frame, outline, border, color, and glow changes belong only on link 1.
+StyleHUDFrame()
 {
-    state_entry()
-    {
-        PLAYER_UUID = llGetOwner();
-        PLAYER_NAME = llGetDisplayName(PLAYER_UUID);
-        
-        // Set up listener for prim touch events
-        llSetTouchText("Click to Play");
-        llSetCullFace(PRIM_FACE_ALL);
-        
-        // Initialize board (9 positions: 0-8)
-        BOARD_STATE = [0,0,0,0,0,0,0,0,0];
-        
-        llOwnerSay("Gaming HUD loaded. Use ~startgame to begin.");
-    }
+    llSetLinkPrimitiveParamsFast(HUD_FRAME_LINK, [
+        PRIM_COLOR, ALL_SIDES, FRAME_COLOR, FRAME_ALPHA,
+        PRIM_GLOW, ALL_SIDES, FRAME_GLOW
+    ]);
+}
 
-    listen(integer channel, string name, key id, string message)
-    {
-        if (id != PLAYER_UUID)
-            return;
+// MOAP/media texture changes belong only on link 2, face 1.
+SetupMOAPScreen(string url)
+{
+    llSetLinkMedia(MOAP_SCREEN_LINK, MOAP_FACE, [
+        PRIM_MEDIA_CURRENT_URL, url,
+        PRIM_MEDIA_HOME_URL, url,
+        PRIM_MEDIA_AUTO_PLAY, TRUE,
+        PRIM_MEDIA_AUTO_SCALE, TRUE,
+        PRIM_MEDIA_PERMS_CONTROL, PRIM_MEDIA_PERM_OWNER,
+        PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_OWNER
+    ]);
+}
 
-        if (message == "~startgame")
-        {
-            StartNewGame();
-        }
-        else if (message == "~endgame")
-        {
-            EndGame();
-        }
-    }
-
-    touch_start(integer total_number)
-    {
-        key toucher = llDetectedKey(0);
-        
-        if (toucher != PLAYER_UUID)
-            return;
-
-        // This would be handled via the HTML interface in MOAP
-        // For now, chat commands work
-    }
-
-    http_response(key request_id, integer status, list metadata, string body)
-    {
-        // Handle responses from backend
-        HandleHTTPResponse(status, body);
-    }
-
-    timer()
-    {
-        // Periodic status check or auto-refresh
-    }
+// Set up the linked HUD parts.
+// Link 1 is the visible frame/outline. Link 2 face 1 is the MOAP screen.
+SetupHUDLinks()
+{
+    StyleHUDFrame();
+    SetupMOAPScreen(MOAP_HOME_URL);
 }
 
 // Start a new game
@@ -188,12 +171,12 @@ HandleHTTPResponse(integer status, string body)
     }
 }
 
-// Utility to get position number from grid click
-// This would be called from the HTML interface
-GetPositionFromClick(integer x, integer y)
+// Utility to get position number from grid click.
+// This would be called from the HTML interface.
+integer GetPositionFromClick(float x, float y)
 {
-    // x, y are normalized coordinates on the prim (0-1)
-    // Convert to tic tac toe grid (0-8)
+    // x, y are normalized coordinates on the prim (0-1).
+    // Convert to tic tac toe grid (0-8).
     if (x < 0.33)
     {
         if (y > 0.66) return 0;
@@ -211,5 +194,61 @@ GetPositionFromClick(integer x, integer y)
         if (y > 0.66) return 2;
         if (y > 0.33) return 5;
         return 8;
+    }
+}
+
+// Initialize HUD
+default
+{
+    state_entry()
+    {
+        PLAYER_UUID = llGetOwner();
+        PLAYER_NAME = llGetDisplayName(PLAYER_UUID);
+
+        // Set up listener for prim touch events
+        llSetTouchText("Click to Play");
+        SetupHUDLinks();
+
+        // Initialize board (9 positions: 0-8)
+        BOARD_STATE = [0,0,0,0,0,0,0,0,0];
+
+        llOwnerSay("Gaming HUD loaded. Use ~startgame to begin.");
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if (id != PLAYER_UUID)
+            return;
+
+        if (message == "~startgame")
+        {
+            StartNewGame();
+        }
+        else if (message == "~endgame")
+        {
+            EndGame();
+        }
+    }
+
+    touch_start(integer total_number)
+    {
+        key toucher = llDetectedKey(0);
+
+        if (toucher != PLAYER_UUID)
+            return;
+
+        // This would be handled via the HTML interface in MOAP
+        // For now, chat commands work
+    }
+
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        // Handle responses from backend
+        HandleHTTPResponse(status, body);
+    }
+
+    timer()
+    {
+        // Periodic status check or auto-refresh
     }
 }

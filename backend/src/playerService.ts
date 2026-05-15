@@ -25,6 +25,12 @@ export interface PlayerWithStats {
   stats: GameStats;
 }
 
+export interface SolitaireStats {
+  games_started: number;
+  games_won: number;
+  best_completion_seconds: number | null;
+}
+
 /**
  * Get or create a player
  */
@@ -168,6 +174,51 @@ export async function saveGameResult(
   } finally {
     client.release();
   }
+}
+
+/**
+ * Record a Solitaire game start.
+ */
+export async function saveSolitaireStart(playerId: number): Promise<number> {
+  const result = await pool.query(
+    `INSERT INTO games (player_id, game_type, result, moves_played, game_duration_seconds, player_moves, ai_moves, final_board_state)
+     VALUES ($1, 'solitaire', 'started', 0, NULL, '[]', '[]', '{}')
+     RETURNING id`,
+    [playerId]
+  );
+
+  return result.rows[0].id;
+}
+
+/**
+ * Mark a Solitaire game as won.
+ */
+export async function saveSolitaireWin(sessionId: number, completionSeconds: number): Promise<void> {
+  await pool.query(
+    `UPDATE games
+     SET result = 'win', game_duration_seconds = $1
+     WHERE id = $2 AND game_type = 'solitaire'`,
+    [completionSeconds, sessionId]
+  );
+}
+
+/**
+ * Get Solitaire stats from the game history table.
+ */
+export async function getSolitaireStats(playerUUID: string): Promise<SolitaireStats | null> {
+  const result = await pool.query(
+    `SELECT
+       COUNT(g.id)::int AS games_started,
+       (COUNT(g.id) FILTER (WHERE g.result = 'win'))::int AS games_won,
+       (MIN(g.game_duration_seconds) FILTER (WHERE g.result = 'win'))::int AS best_completion_seconds
+     FROM players p
+     LEFT JOIN games g ON g.player_id = p.id AND g.game_type = 'solitaire'
+     WHERE p.uuid = $1
+     GROUP BY p.id`,
+    [playerUUID]
+  );
+
+  return result.rows[0] || null;
 }
 
 /**

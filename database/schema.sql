@@ -1,5 +1,5 @@
 -- Gaming HUD Database Schema
--- PostgreSQL Schema for MOAP Tic Tac Toe Game
+-- PostgreSQL Schema for MOAP Tic Tac Toe and Solitaire Games
 
 -- Create players table
 CREATE TABLE IF NOT EXISTS players (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS games (
     id SERIAL PRIMARY KEY,
     player_id INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     game_type VARCHAR(50) DEFAULT 'tic_tac_toe',
-    result VARCHAR(20), -- 'win', 'loss', 'draw'
+    result VARCHAR(20), -- 'started', 'win', 'loss', 'draw'
     moves_played INTEGER,
     game_duration_seconds INTEGER,
     player_moves TEXT, -- JSON array of player moves

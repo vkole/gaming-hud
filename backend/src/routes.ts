@@ -6,6 +6,9 @@ import {
   getPlayerStats,
   getPlayerWithStats,
   saveGameResult,
+  saveSolitaireStart,
+  saveSolitaireWin,
+  getSolitaireStats,
   getTopPlayersByWins,
   getAllPlayersWithStats,
 } from './playerService';
@@ -167,6 +170,85 @@ router.post('/games/end', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error ending game:', error);
     res.status(500).json({ error: 'Failed to save game result' });
+  }
+});
+
+/**
+ * POST /api/solitaire/start
+ * Record a Solitaire game start
+ */
+router.post('/solitaire/start', async (req: Request, res: Response) => {
+  try {
+    const { playerUUID, playerName } = req.body;
+
+    if (!playerUUID || !playerName) {
+      return res.status(400).json({ error: 'playerUUID and playerName are required' });
+    }
+
+    const player = await getOrCreatePlayer(playerUUID, playerName);
+    const sessionId = await saveSolitaireStart(player.id);
+
+    res.json({
+      sessionId,
+      player: {
+        id: player.id,
+        uuid: player.uuid,
+        display_name: player.display_name,
+      },
+    });
+  } catch (error) {
+    console.error('Error starting Solitaire:', error);
+    res.status(500).json({ error: 'Failed to start Solitaire' });
+  }
+});
+
+/**
+ * POST /api/solitaire/win
+ * Record a Solitaire win and completion time
+ */
+router.post('/solitaire/win', async (req: Request, res: Response) => {
+  try {
+    const { sessionId, completionSeconds } = req.body;
+
+    if (!sessionId || !completionSeconds) {
+      return res.status(400).json({ error: 'sessionId and completionSeconds are required' });
+    }
+
+    await saveSolitaireWin(Number(sessionId), Number(completionSeconds));
+
+    res.json({
+      success: true,
+      message: 'Solitaire win saved',
+    });
+  } catch (error) {
+    console.error('Error saving Solitaire win:', error);
+    res.status(500).json({ error: 'Failed to save Solitaire win' });
+  }
+});
+
+/**
+ * GET /api/solitaire/players/:playerUUID/stats
+ * Get Solitaire stats for a player
+ */
+router.get('/solitaire/players/:playerUUID/stats', async (req: Request, res: Response) => {
+  try {
+    const { playerUUID } = req.params;
+    const stats = await getSolitaireStats(playerUUID);
+
+    if (!stats) {
+      return res.json({
+        stats: {
+          games_started: 0,
+          games_won: 0,
+          best_completion_seconds: null,
+        },
+      });
+    }
+
+    res.json({ stats });
+  } catch (error) {
+    console.error('Error fetching Solitaire stats:', error);
+    res.status(500).json({ error: 'Failed to fetch Solitaire stats' });
   }
 });
 

@@ -12,42 +12,65 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Gaming MOAP HUD</p>
-          <h1>Tic Tac Toe</h1>
+          <h1 id="gameTitle">Tic Tac Toe</h1>
         </div>
-        <div class="service" id="serviceStatus">Checking API</div>
+        <div class="top-actions">
+          <nav class="game-tabs" aria-label="Game selector">
+            <button class="tab active" type="button" data-game="tictactoe">Tic Tac Toe</button>
+            <button class="tab" type="button" data-game="solitaire">Solitaire</button>
+          </nav>
+          <div class="service" id="serviceStatus">Checking API</div>
+        </div>
       </header>
 
       <section class="score-strip" aria-label="Player statistics">
         <div>
-          <span>Total</span>
-          <strong id="totalGames">0</strong>
+          <span id="statOneLabel">Total</span>
+          <strong id="statOne">0</strong>
         </div>
         <div>
-          <span>Wins</span>
-          <strong id="wins">0</strong>
+          <span id="statTwoLabel">Wins</span>
+          <strong id="statTwo">0</strong>
         </div>
         <div>
-          <span>Losses</span>
-          <strong id="losses">0</strong>
+          <span id="statThreeLabel">Losses</span>
+          <strong id="statThree">0</strong>
         </div>
         <div>
-          <span>Draws</span>
-          <strong id="draws">0</strong>
+          <span id="statFourLabel">Draws</span>
+          <strong id="statFour">0</strong>
         </div>
       </section>
 
       <section class="play-area">
-        <div class="board" id="board" aria-label="Tic Tac Toe board">
-          <button class="cell" type="button" data-index="0" aria-label="Top left"></button>
-          <button class="cell" type="button" data-index="1" aria-label="Top center"></button>
-          <button class="cell" type="button" data-index="2" aria-label="Top right"></button>
-          <button class="cell" type="button" data-index="3" aria-label="Middle left"></button>
-          <button class="cell" type="button" data-index="4" aria-label="Middle center"></button>
-          <button class="cell" type="button" data-index="5" aria-label="Middle right"></button>
-          <button class="cell" type="button" data-index="6" aria-label="Bottom left"></button>
-          <button class="cell" type="button" data-index="7" aria-label="Bottom center"></button>
-          <button class="cell" type="button" data-index="8" aria-label="Bottom right"></button>
-        </div>
+        <section class="game-view active" id="tictactoeView" aria-label="Tic Tac Toe">
+          <div class="board" id="board" aria-label="Tic Tac Toe board">
+            <button class="cell" type="button" data-index="0" aria-label="Top left"></button>
+            <button class="cell" type="button" data-index="1" aria-label="Top center"></button>
+            <button class="cell" type="button" data-index="2" aria-label="Top right"></button>
+            <button class="cell" type="button" data-index="3" aria-label="Middle left"></button>
+            <button class="cell" type="button" data-index="4" aria-label="Middle center"></button>
+            <button class="cell" type="button" data-index="5" aria-label="Middle right"></button>
+            <button class="cell" type="button" data-index="6" aria-label="Bottom left"></button>
+            <button class="cell" type="button" data-index="7" aria-label="Bottom center"></button>
+            <button class="cell" type="button" data-index="8" aria-label="Bottom right"></button>
+          </div>
+        </section>
+
+        <section class="game-view" id="solitaireView" aria-label="Klondike Solitaire">
+          <div class="solitaire-table" id="solitaireTable">
+            <div class="solitaire-row">
+              <button class="pile stock" type="button" id="stockPile" aria-label="Stock pile"></button>
+              <button class="pile waste" type="button" id="wastePile" aria-label="Waste pile"></button>
+              <div class="spacer"></div>
+              <button class="pile foundation" type="button" data-foundation="0" aria-label="Foundation pile 1"></button>
+              <button class="pile foundation" type="button" data-foundation="1" aria-label="Foundation pile 2"></button>
+              <button class="pile foundation" type="button" data-foundation="2" aria-label="Foundation pile 3"></button>
+              <button class="pile foundation" type="button" data-foundation="3" aria-label="Foundation pile 4"></button>
+            </div>
+            <div class="tableau" id="tableau" aria-label="Tableau columns"></div>
+          </div>
+        </section>
 
         <aside class="panel">
           <div class="player">
@@ -60,7 +83,7 @@
             <button type="button" id="refreshStats">Refresh Stats</button>
           </div>
           <div class="leaderboard">
-            <h2>Top Wins</h2>
+            <h2 id="leaderboardTitle">Top Tic Tac Toe Wins</h2>
             <ol id="leaderboard"></ol>
           </div>
         </aside>
