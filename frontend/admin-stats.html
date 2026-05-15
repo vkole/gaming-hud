@@ -258,6 +258,141 @@
                 font-size: 32px;
             }
         }
+
+        :root {
+            --bg: #050108;
+            --panel: rgba(18, 9, 31, 0.90);
+            --panel-2: rgba(32, 12, 52, 0.92);
+            --line: rgba(255, 74, 230, 0.34);
+            --text: #fff6ff;
+            --muted: #cbb6d8;
+            --pink: #ff35d2;
+            --purple: #9b3dff;
+            --magenta: #d900ff;
+            --cyan: #4ffcff;
+            --green: #5dffb0;
+            --red: #ff5c8a;
+            --amber: #ffd166;
+            --gradient-main: linear-gradient(135deg, var(--pink), var(--purple));
+            --gradient-alt: linear-gradient(135deg, var(--purple), var(--magenta));
+            --glow-pink: 0 0 18px rgba(255, 53, 210, 0.42), 0 0 42px rgba(155, 61, 255, 0.20);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 16% 8%, rgba(255, 53, 210, 0.18), transparent 30%),
+                radial-gradient(circle at 84% 18%, rgba(155, 61, 255, 0.20), transparent 32%),
+                linear-gradient(135deg, #07020c 0%, #12051f 48%, #050108 100%);
+            color: var(--text);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+            background-size: 34px 34px;
+        }
+
+        header h1 {
+            color: var(--text);
+            text-shadow: 0 0 22px rgba(255, 53, 210, 0.58);
+        }
+
+        header p,
+        .no-data,
+        .uuid-cell,
+        .stat {
+            color: var(--muted);
+        }
+
+        .stat-card,
+        .table-section {
+            background: linear-gradient(180deg, rgba(255, 53, 210, 0.06), rgba(18, 9, 31, 0.92));
+            border: 1px solid var(--line);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42), var(--glow-pink);
+            color: var(--text);
+        }
+
+        .stat-card h3,
+        .table-section h2,
+        th,
+        .rank,
+        .stat-value {
+            color: var(--cyan);
+            text-shadow: 0 0 12px rgba(79, 252, 255, 0.42);
+        }
+
+        .stat-card .value {
+            color: var(--pink);
+            text-shadow: 0 0 18px rgba(255, 53, 210, 0.62);
+        }
+
+        .table-section h2 {
+            border-bottom-color: var(--pink);
+        }
+
+        table {
+            color: var(--text);
+        }
+
+        thead,
+        tbody tr:hover {
+            background: rgba(255, 53, 210, 0.08);
+        }
+
+        th,
+        td {
+            border-color: rgba(255, 74, 230, 0.18);
+        }
+
+        .player-name {
+            color: var(--text);
+        }
+
+        .stat.wins {
+            color: var(--green);
+        }
+
+        .stat.losses {
+            color: var(--red);
+        }
+
+        .stat.draws {
+            color: var(--amber);
+        }
+
+        button {
+            background: var(--gradient-main);
+            border: 1px solid rgba(255, 74, 230, 0.55);
+            box-shadow: var(--glow-pink);
+            color: #fff;
+        }
+
+        button:hover {
+            background: var(--gradient-alt);
+            box-shadow: 0 0 24px rgba(255, 53, 210, 0.55), 0 0 54px rgba(155, 61, 255, 0.32);
+        }
+
+        .spinner {
+            border-color: rgba(255, 255, 255, 0.14);
+            border-top-color: var(--pink);
+            box-shadow: 0 0 18px rgba(255, 53, 210, 0.36);
+        }
+
+        .loading {
+            color: var(--pink);
+        }
+
+        .error,
+        .success {
+            background: rgba(18, 9, 31, 0.90);
+            border-color: var(--pink);
+            color: var(--text);
+        }
     </style>
 </head>
 <body>
